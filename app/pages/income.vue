@@ -53,6 +53,13 @@ function exportIncomeCsv() {
     entry.amount,
     entry.annualDue ?? '',
   ])
+  rows.push([
+    'Total',
+    '',
+    '',
+    totalAmount.value,
+    totalAnnualSubscription.value,
+  ])
 
   downloadCsv(
     `income-${new Date().toISOString().slice(0, 10)}.csv`,

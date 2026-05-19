@@ -1,8 +1,22 @@
-import { collection as fsCollection, deleteDoc, doc, getDocs, setDoc, updateDoc } from 'firebase/firestore'
+import {
+  collection as fsCollection,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  setDoc,
+  updateDoc
+} from 'firebase/firestore'
 import { financeSeed } from '~/data/financeSeed'
 import type { CollectionName as FinanceCollectionName } from '~/types/finance'
 
 export type CollectionName = FinanceCollectionName
+
+type ListenerState = {
+  unsubscribe: () => void
+  ready: Promise<void>
+}
+
+const listenerState = new Map<CollectionName, ListenerState>()
 
 function cloneSeed<T>(rows: T[]) {
   return rows.map((row) => ({ ...row }))
@@ -38,23 +52,70 @@ export function useCollectionApi<T>(collectionName: CollectionName) {
     } as T
   }
 
-  async function load() {
+  function syncFromSnapshot(snapshot: { docs: Array<{ id: string; data(): Record<string, unknown> }> }) {
+    const records = snapshot.docs.map((entry) => toRecord(entry.id, entry.data()))
+    items.value = sortByUpdatedAtDesc(records)
+  }
+
+  function startRealtimeSync(firestore: NonNullable<typeof nuxtApp.$firestore>) {
+    const existing = listenerState.get(collectionName)
+    if (existing) {
+      return existing.ready
+    }
+
     pending.value = true
     error.value = null
 
+    const state: ListenerState = {
+      unsubscribe: () => {},
+      ready: Promise.resolve()
+    }
+    let settled = false
+
+    const ready = new Promise<void>((resolve, reject) => {
+      state.unsubscribe = onSnapshot(
+        fsCollection(firestore, collectionName),
+        (snapshot) => {
+          syncFromSnapshot(snapshot)
+          error.value = null
+
+          if (!settled) {
+            settled = true
+            pending.value = false
+            resolve()
+          }
+        },
+        (err) => {
+          error.value = err instanceof Error ? err.message : `Failed to load ${collectionName}`
+          pending.value = false
+
+          if (!settled) {
+            settled = true
+            reject(err)
+          }
+        }
+      )
+    })
+
+    state.ready = ready
+    listenerState.set(collectionName, state)
+    return ready
+  }
+
+  async function load() {
     try {
       const firestore = getFirestore()
 
       if (!firestore) {
+        pending.value = true
+        error.value = null
         if (!items.value.length) {
           items.value = cloneSeed(seedData)
         }
         return
       }
 
-      const snapshot = await getDocs(fsCollection(firestore, collectionName))
-      const records = snapshot.docs.map((entry) => toRecord(entry.id, entry.data() as Record<string, unknown>))
-      items.value = sortByUpdatedAtDesc(records)
+      await startRealtimeSync(firestore)
     } catch (err) {
       error.value = err instanceof Error ? err.message : `Failed to load ${collectionName}`
     } finally {

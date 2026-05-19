@@ -47,12 +47,18 @@ function exportExpenseCsv() {
     entry.paidAt,
     entry.amount,
     entry.method,
-    entry.notes
+  ])
+  rows.push([
+    'Total',
+    '',
+    '',
+    totalAmount.value,
+    '',
   ])
 
   downloadCsv(
     `expense-${new Date().toISOString().slice(0, 10)}.csv`,
-    ['Category', 'Paid to', 'Date', 'Amount', 'Method', 'Notes'],
+    ['Category', 'Paid to', 'Date', 'Amount', 'Method'],
     rows
   )
 }
