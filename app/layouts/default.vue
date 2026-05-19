@@ -28,6 +28,7 @@ const pageMeta = computed(() => titleMap[route.path] ?? {
 })
 
 const today = formatDisplayDate(new Date())
+const { isDark, toggleTheme } = useThemeMode()
 
 const navItems = [
   {
@@ -160,8 +161,16 @@ const navItems = [
             </svg>
             {{ today }}
           </span>
-          <button class="ghost-icon-btn" type="button" aria-label="Appearance preview">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
+          <button
+            class="ghost-icon-btn"
+            type="button"
+            :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+            @click="toggleTheme"
+          >
+            <svg v-if="isDark" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M18 15.3A7.2 7.2 0 0 1 8.7 6a8 8 0 1 0 9.3 9.3Z" />
+            </svg>
+            <svg v-else viewBox="0 0 24 24" aria-hidden="true">
               <circle cx="12" cy="12" r="4" />
               <path d="M12 2.5v2.5M12 19v2.5M4.8 4.8l1.8 1.8M17.4 17.4l1.8 1.8M2.5 12H5M19 12h2.5M4.8 19.2l1.8-1.8M17.4 6.6l1.8-1.8" />
             </svg>
@@ -172,4 +181,6 @@ const navItems = [
       <slot />
     </main>
   </div>
+
+  <ConfirmDialog />
 </template>

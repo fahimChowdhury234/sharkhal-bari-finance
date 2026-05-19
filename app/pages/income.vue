@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { IncomeRecord } from '~/types/finance'
+import { confirmDelete } from '~/utils/confirmDelete'
 import { downloadCsv } from '~/utils/exportCsv'
 import { formatDisplayDate } from '~/utils/formatDate'
 
@@ -115,7 +116,7 @@ async function handleSubmit(payload: Record<string, unknown>) {
 }
 
 async function handleDelete(entry: IncomeRecord) {
-  if (!confirm(`Delete income entry from ${entry.source}?`)) {
+  if (!(await confirmDelete(`Delete income entry from ${entry.source}?`))) {
     return
   }
 
