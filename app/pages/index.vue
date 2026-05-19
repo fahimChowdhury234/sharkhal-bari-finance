@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ExpenseRecord, IncomeRecord, MemberRecord } from '~/types/finance'
+import { formatDisplayDate } from '~/utils/formatDate'
 
 const money = new Intl.NumberFormat('en-BD', {
   maximumFractionDigits: 0
@@ -25,6 +26,10 @@ const initialLoad = ref(false)
 
 function formatMoney(amount: number) {
   return `৳${money.format(amount)}`
+}
+
+function formatDate(value?: string) {
+  return formatDisplayDate(value)
 }
 
 const statCards = computed(() => [
@@ -158,7 +163,7 @@ onMounted(async () => {
           </span>
           <div class="recent-copy">
             <strong>{{ entry.source }}</strong>
-            <div class="recent-meta">{{ entry.category }} · {{ entry.receivedAt }}</div>
+            <div class="recent-meta">{{ entry.category }} · {{ formatDate(entry.receivedAt) }}</div>
           </div>
           <strong class="recent-amount">{{ formatMoney(entry.amount) }}</strong>
         </div>
@@ -192,7 +197,7 @@ onMounted(async () => {
           </span>
           <div class="recent-copy">
             <strong>{{ entry.category }}</strong>
-            <div class="recent-meta">{{ entry.paidTo }} · {{ entry.paidAt }}</div>
+            <div class="recent-meta">{{ entry.paidTo }} · {{ formatDate(entry.paidAt) }}</div>
           </div>
           <strong class="recent-amount" style="color: #d64e1f;">{{ formatMoney(entry.amount) }}</strong>
         </div>

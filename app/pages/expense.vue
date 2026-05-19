@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ExpenseRecord } from '~/types/finance'
 import { downloadCsv } from '~/utils/exportCsv'
+import { formatDisplayDate } from '~/utils/formatDate'
 
 const { items, load, createOne, updateOne, removeOne, pending, error } = useCollectionApi<ExpenseRecord>('expense')
 
@@ -36,6 +37,10 @@ function formatMoney(amount: number) {
   return `৳${money.format(amount)}`
 }
 
+function formatDate(value?: string) {
+  return formatDisplayDate(value)
+}
+
 function clearPaidToFilter() {
   paidToFilter.value = ''
 }
@@ -44,7 +49,7 @@ function exportExpenseCsv() {
   const rows = filteredItems.value.map((entry) => [
     entry.category,
     entry.paidTo,
-    entry.paidAt,
+    formatDate(entry.paidAt),
     entry.amount,
     entry.method,
   ])
@@ -169,7 +174,7 @@ async function handleDelete(entry: ExpenseRecord) {
                 <strong>{{ entry.category }}</strong>
                 <div class="muted">{{ entry.paidTo }}</div>
               </td>
-              <td>{{ entry.paidAt }}</td>
+              <td>{{ formatDate(entry.paidAt) }}</td>
               <td>{{ formatMoney(entry.amount) }}</td>
               <td>
                 <div class="button-row">

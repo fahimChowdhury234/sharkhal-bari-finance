@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { IncomeRecord } from '~/types/finance'
 import { downloadCsv } from '~/utils/exportCsv'
+import { formatDisplayDate } from '~/utils/formatDate'
 
 const { items, load, createOne, updateOne, removeOne, pending, error } = useCollectionApi<IncomeRecord>('income')
 
@@ -41,6 +42,10 @@ function formatOptionalMoney(amount?: number) {
   return typeof amount === 'number' ? formatMoney(amount) : '—'
 }
 
+function formatDate(value?: string) {
+  return formatDisplayDate(value)
+}
+
 function clearReceivedByFilter() {
   receivedByFilter.value = ''
 }
@@ -49,7 +54,7 @@ function exportIncomeCsv() {
   const rows = filteredItems.value.map((entry) => [
     entry.source,
     entry.receivedBy,
-    entry.receivedAt,
+    formatDate(entry.receivedAt),
     entry.amount,
     entry.annualDue ?? '',
   ])
@@ -177,7 +182,7 @@ async function handleDelete(entry: IncomeRecord) {
                 <div class="muted">{{ entry.category }}</div>
               </td>
               <td>{{ entry.receivedBy }}</td>
-              <td>{{ entry.receivedAt }}</td>
+              <td>{{ formatDate(entry.receivedAt) }}</td>
               <td>{{ formatMoney(entry.amount) }}</td>
               <td>{{ formatOptionalMoney(entry.annualDue) }}</td>
               <td>

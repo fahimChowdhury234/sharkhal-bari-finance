@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { formatDisplayDate } from '~/utils/formatDate'
+
 const route = useRoute()
 
 const titleMap: Record<string, { title: string; subtitle: string }> = {
@@ -25,11 +27,7 @@ const pageMeta = computed(() => titleMap[route.path] ?? {
   subtitle: 'Manage your records from one place'
 })
 
-const today = new Intl.DateTimeFormat('en-GB', {
-  day: '2-digit',
-  month: 'short',
-  year: 'numeric'
-}).format(new Date())
+const today = formatDisplayDate(new Date())
 
 const navItems = [
   {
