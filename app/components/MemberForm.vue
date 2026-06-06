@@ -56,7 +56,13 @@ watch(
 
 function handleSubmit() {
   emit('submit', {
-    ...form,
+    name: form.name,
+    phone: form.phone,
+    email: form.email,
+    address: form.address,
+    joinDate: form.joinDate,
+    status: form.status,
+    notes: form.notes,
     monthlyDue: Number(form.monthlyDue) || 0,
     annualDue: Number(form.annualDue) || 0,
     paidAmount: Number(form.paidAmount) || 0
@@ -79,17 +85,17 @@ function handleSubmit() {
 
       <div class="field">
         <label for="member-email">Email</label>
-        <input id="member-email" v-model="form.email" type="email" placeholder="name@example.com" required>
+        <input id="member-email" v-model="form.email" type="email" placeholder="name@example.com">
       </div>
 
       <div class="field">
         <label for="member-join-date">Join date</label>
-        <input id="member-join-date" v-model="form.joinDate" type="date" required>
+        <input id="member-join-date" v-model="form.joinDate" type="date">
       </div>
 
       <div class="field">
         <label for="member-due">Monthly due</label>
-        <input id="member-due" v-model="form.monthlyDue" type="number" min="0" step="1" required>
+        <input id="member-due" v-model="form.monthlyDue" type="number" min="0" step="1" >
       </div>
 
       <div class="field">
@@ -113,7 +119,7 @@ function handleSubmit() {
 
     <div class="field">
       <label for="member-address">Address</label>
-      <textarea id="member-address" v-model="form.address" placeholder="House, road, area" required></textarea>
+      <textarea id="member-address" v-model="form.address" placeholder="House, road, area"></textarea>
     </div>
 
     <div class="field">
