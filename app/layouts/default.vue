@@ -2,6 +2,13 @@
 import { formatDisplayDate } from '~/utils/formatDate'
 
 const route = useRoute()
+const router = useRouter()
+const { user, signOut } = useAuth()
+
+async function handleSignOut() {
+  await signOut()
+  router.push('/login')
+}
 
 const titleMap: Record<string, { title: string; subtitle: string }> = {
   '/': {
@@ -131,13 +138,21 @@ const navItems = [
         <div class="profile-mark">SB</div>
         <div class="sidebar-profile-copy">
           <strong>Sharkhal Bari</strong>
-          <span>Finance Manager</span>
+          <span class="muted" style="font-size: 0.75rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ user?.email ?? 'Finance Manager' }}</span>
         </div>
-        <span class="profile-chevron" aria-hidden="true">
+        <button
+          class="ghost-icon-btn"
+          type="button"
+          title="Sign out"
+          aria-label="Sign out"
+          @click="handleSignOut"
+        >
           <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="m8 10 4 4 4-4" />
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+            <polyline points="10 17 15 12 10 7" />
+            <line x1="15" y1="12" x2="3" y2="12" />
           </svg>
-        </span>
+        </button>
       </div>
     </aside>
 
@@ -152,7 +167,7 @@ const navItems = [
         <div class="page-header-meta">
           <span class="status-chip">
             <span class="status-dot" />
-            Frontend only
+            Live
           </span>
           <span class="date-chip">
             <svg viewBox="0 0 24 24" aria-hidden="true">

@@ -1,7 +1,7 @@
 import { getAnalytics, isSupported } from 'firebase/analytics'
-import { initializeApp, getApp, getApps, type FirebaseApp } from 'firebase/app'
-import { getAuth, type Auth } from 'firebase/auth'
-import { getFirestore, type Firestore } from 'firebase/firestore'
+import { initializeApp, getApp, getApps } from 'firebase/app'
+import { getAuth, onAuthStateChanged, type User } from 'firebase/auth'
+import { getFirestore } from 'firebase/firestore'
 
 function getFirebaseConfig() {
   const config = useRuntimeConfig().public
@@ -17,17 +17,15 @@ function getFirebaseConfig() {
   }
 }
 
-export default defineNuxtPlugin(async () => {
+export default defineNuxtPlugin(async (nuxtApp) => {
   const firebaseConfig = getFirebaseConfig()
+  const authUser = useState<User | null>('auth-user', () => null)
 
   if (!firebaseConfig.apiKey || !firebaseConfig.projectId || !firebaseConfig.appId) {
-    return {
-      provide: {
-        firebaseApp: null,
-        firebaseAuth: null,
-        firestore: null
-      }
-    }
+    nuxtApp.provide('firebaseApp', null)
+    nuxtApp.provide('firebaseAuth', null)
+    nuxtApp.provide('firestore', null)
+    return
   }
 
   const app = getApps().length ? getApp() : initializeApp(firebaseConfig)
@@ -41,11 +39,21 @@ export default defineNuxtPlugin(async () => {
     }
   }
 
-  return {
-    provide: {
-      firebaseApp: app,
-      firebaseAuth: auth,
-      firestore
-    }
-  }
+  // Await initial auth state so middleware can check it synchronously
+  await new Promise<void>((resolve) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      authUser.value = user
+      unsubscribe()
+      resolve()
+    })
+  })
+
+  // Keep state in sync with subsequent auth changes
+  onAuthStateChanged(auth, (user) => {
+    authUser.value = user
+  })
+
+  nuxtApp.provide('firebaseApp', app)
+  nuxtApp.provide('firebaseAuth', auth)
+  nuxtApp.provide('firestore', firestore)
 })
