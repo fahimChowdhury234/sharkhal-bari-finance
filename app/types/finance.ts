@@ -1,5 +1,15 @@
 export type CollectionName = 'members' | 'income' | 'expense'
 
+export interface Account {
+  id: string
+  label: string
+  startDate: string
+  endDate: string
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+}
+
 export interface MemberRecord {
   id: string
   name: string

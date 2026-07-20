@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { formatDisplayDate } from '~/utils/formatDate'
+import { bootstrapDefaultAccount } from '~/utils/bootstrapDefaultAccount'
 
 const route = useRoute()
 const router = useRouter()
@@ -37,6 +38,35 @@ const pageMeta = computed(() => titleMap[route.path] ?? {
 const today = formatDisplayDate(new Date())
 const { isDark, toggleTheme } = useThemeMode()
 
+const { items: accounts, load: loadAccounts } = useAccounts()
+const { activeAccountId, setActiveAccount } = useActiveAccount()
+const nuxtApp = useNuxtApp()
+
+onMounted(async () => {
+  await loadAccounts()
+
+  const firestore = nuxtApp.$firestore
+  if (firestore && accounts.value.length === 0) {
+    const createdId = await bootstrapDefaultAccount(firestore)
+    if (createdId) {
+      setActiveAccount(createdId)
+      return
+    }
+  }
+
+  if (!activeAccountId.value) {
+    const active = accounts.value.find((account) => account.isActive)
+    if (active) {
+      setActiveAccount(active.id)
+    }
+  }
+})
+
+function handleAccountChange(event: Event) {
+  const id = (event.target as HTMLSelectElement).value
+  setActiveAccount(id || null)
+}
+
 const navItems = [
   {
     to: '/',
@@ -57,6 +87,11 @@ const navItems = [
     to: '/expense',
     label: 'Expense',
     icon: 'expense'
+  },
+  {
+    to: '/accounts',
+    label: 'Accounts',
+    icon: 'accounts'
   }
 ]
 </script>
@@ -106,11 +141,15 @@ const navItems = [
               <path d="M5 17l6-6 4 4 4-7" />
               <path d="M14 8h5v5" />
             </svg>
-            <svg v-else viewBox="0 0 24 24" aria-hidden="true">
+            <svg v-else-if="item.icon === 'expense'" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M6 4h9l3 3v13H6z" />
               <path d="M15 4v4h4" />
               <path d="M8 13h8" />
               <path d="M8 16h8" />
+            </svg>
+            <svg v-else viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M7 3v3M17 3v3M4.5 9h15" />
+              <rect x="4.5" y="5.5" width="15" height="15" rx="2.5" />
             </svg>
           </span>
           <span>{{ item.label }}</span>
@@ -165,6 +204,18 @@ const navItems = [
         </div>
 
         <div class="page-header-meta">
+          <span class="account-chip">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6 4h9l3 3v13H6z" />
+              <path d="M15 4v4h4" />
+            </svg>
+            <select :value="activeAccountId ?? ''" aria-label="Active account" @change="handleAccountChange">
+              <option value="" disabled>Select account</option>
+              <option v-for="account in accounts" :key="account.id" :value="account.id">
+                {{ account.label }}
+              </option>
+            </select>
+          </span>
           <span class="status-chip">
             <span class="status-dot" />
             Live

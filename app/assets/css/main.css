@@ -140,7 +140,8 @@ body {
 :root[data-theme='dark'] .section-link,
 :root[data-theme='dark'] .pill,
 :root[data-theme='dark'] .status-chip,
-:root[data-theme='dark'] .date-chip {
+:root[data-theme='dark'] .date-chip,
+:root[data-theme='dark'] .account-chip {
   color: var(--text);
 }
 
@@ -165,6 +166,7 @@ body {
 }
 
 :root[data-theme='dark'] .date-chip,
+:root[data-theme='dark'] .account-chip,
 :root[data-theme='dark'] .ghost-icon-btn,
 :root[data-theme='dark'] .btn.ghost,
 :root[data-theme='dark'] .section-link {
@@ -591,6 +593,36 @@ textarea {
 
 .date-chip svg {
   color: #68809d;
+}
+
+.account-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 12px 0 16px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.78);
+  color: #275e58;
+  font-weight: 700;
+  box-shadow: var(--shadow-soft);
+}
+
+.account-chip svg {
+  color: #68809d;
+  width: 18px;
+  height: 18px;
+}
+
+.account-chip select {
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  outline: none;
 }
 
 .ghost-icon-btn {
